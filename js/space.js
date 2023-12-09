@@ -22,7 +22,7 @@ let ship = {
 let shipImg;
 let shipVelocityX = tileSize;
 
-let aliensArray = [];
+let alienArray = [];
 let alienWidth = tileSize*2;
 let alienHeight = tileSize
 let alienX = tileSize;
@@ -32,7 +32,11 @@ let alienImg;
 let alienRows = 2;
 let aliensColumns = 3;
 let alienCount = 0;
+let alienVelocityX = 1;
 
+//tiros
+let bulletArray =[];
+let bulletVelocityY = -10;
 
 window.onload = function(){
     board = document.getElementById("board");
@@ -52,9 +56,11 @@ window.onload = function(){
 
     alienImg = new Image();
     alienImg.src="./assets/alien.png";
+    createAliens()
 
     requestAnimationFrame(update);
     document.addEventListener("keydown", moveShip);
+    document.addEventListener("keyup", shoot);
 }
 
 function update() {
@@ -63,6 +69,24 @@ function update() {
     context.clearRect(0,0, board.width, board.height);
 
     context.drawImage(shipImg, ship.x, ship.y, ship.width, ship.height);
+    //aliens
+    for(let i = 0; i < alienArray.length; i++) {
+        let alien = alienArray[i];
+        if (alien.alive){
+            alien.x += alienVelocityX
+            //Se os aliente tocarem as baordas
+            if(alien.x + alien.width >= board.width || alien.x <= 0){
+                alienVelocityX *= -1;
+                alien.x += alienVelocityX*2
+
+                //mover todos os aliente de cima para outra lnha
+                for(let j = 0; j < alienArray.length; j++) {
+                    alienArray[j].y += alienHeight;
+                }
+            }
+            context.drawImage(alienImg, alien.x, alien.y, alien.width, alien.height);
+        }
+    }
 }
 
 
@@ -83,8 +107,24 @@ function createAliens(){
                 x: alienX + c*alienWidth,
                 y: alienY + r*alienHeight,
                 width: alienWidth,
-                height: alienHeight
+                height: alienHeight,
+                alive: true
             }
+            alienArray.push(alien);
         }
+    }
+    alienCount = alienArray.length;
+}
+
+function shoot(e) {
+    if (e.code == "Space") {
+        let bullet = {
+            x: ship.x + shipWidth*15/32,
+            y: ship.y,
+            width: tileSize/8,
+            height: tileSize/2,
+            used: false
+        }
+        bulletArray.push(bullet)
     }
 }
